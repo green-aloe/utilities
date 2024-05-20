@@ -51,6 +51,26 @@ func (s *Stack[T]) Pop() (t T) {
 	return v
 }
 
+// CheckPop returns the value at the top of the stack and a boolean indicating whether the stack is
+// empty. If the stack is empty, this returns the zero value of the stack's type and false.
+func (s *Stack[T]) CheckPop() (t T, ok bool) {
+	if s == nil {
+		return
+	}
+
+	s.mutex.Lock()
+	defer s.mutex.Unlock()
+
+	if s.top == nil {
+		return
+	}
+
+	v := s.top.v
+	s.top = s.top.next
+
+	return v, true
+}
+
 // Peek returns the value at the top of the stack without removing it. If the stack is empty, this
 // returns the zero value of the stack's type.
 func (s *Stack[T]) Peek() (t T) {

@@ -78,6 +78,8 @@ func Test_Stack_Pop(t *testing.T) {
 		for i := 10; i >= 1; i-- {
 			require.Equal(t, i, s.Pop())
 		}
+
+		require.Zero(t, s.Pop())
 	})
 
 	t.Run("concurrent use", func(t *testing.T) {
@@ -89,7 +91,7 @@ func Test_Stack_Pop(t *testing.T) {
 			want = append(want, i)
 		}
 
-		ch := make(chan any, 100)
+		ch := make(chan int, 100)
 		for i := 0; i < 100; i++ {
 			go func() {
 				ch <- s.Pop()
@@ -98,14 +100,95 @@ func Test_Stack_Pop(t *testing.T) {
 
 		var have []int
 		for i := 0; i < 100; i++ {
-			v := <-ch
-			i, ok := v.(int)
-			require.True(t, ok)
-			have = append(have, i)
+			have = append(have, <-ch)
 		}
 		sort.Slice(have, func(i, j int) bool { return have[i] < have[j] })
 		require.Equal(t, want, have)
 		require.Len(t, ch, 0)
+
+		require.Zero(t, s.Pop())
+	})
+}
+
+// Test_Stack_CheckPop tests that Stack's CheckPop method returns the value at the top of the stack
+// and a boolean indicating whether the stack is empty for various stack configurations.
+func Test_Stack_CheckPop(t *testing.T) {
+	t.Run("nil stack", func(t *testing.T) {
+		var s *Stack[uint8]
+		top, ok := s.CheckPop()
+		require.Zero(t, top)
+		require.False(t, ok)
+
+		top, ok = s.CheckPop()
+		require.Zero(t, top)
+		require.False(t, ok)
+
+		top, ok = s.CheckPop()
+		require.Zero(t, top)
+		require.False(t, ok)
+	})
+
+	t.Run("empty stack", func(t *testing.T) {
+		var s Stack[string]
+		top, ok := s.CheckPop()
+		require.Zero(t, top)
+		require.False(t, ok)
+
+		top, ok = s.CheckPop()
+		require.Zero(t, top)
+		require.False(t, ok)
+
+		top, ok = s.CheckPop()
+		require.Zero(t, top)
+		require.False(t, ok)
+	})
+
+	t.Run("non-empty stack", func(t *testing.T) {
+		var s Stack[int]
+		for i := 1; i <= 10; i++ {
+			s.Push(i)
+		}
+		for i := 10; i >= 1; i-- {
+			top, ok := s.CheckPop()
+			require.Equal(t, i, top)
+			require.True(t, ok)
+		}
+
+		top, ok := s.CheckPop()
+		require.Zero(t, top)
+		require.False(t, ok)
+	})
+
+	t.Run("concurrent use", func(t *testing.T) {
+		var s Stack[int]
+
+		var want []int
+		for i := 0; i < 100; i++ {
+			s.Push(i)
+			want = append(want, i)
+		}
+
+		ch := make(chan int, 100)
+		for i := 0; i < 100; i++ {
+			go func() {
+				top, ok := s.CheckPop()
+				require.True(t, ok)
+
+				ch <- top
+			}()
+		}
+
+		var have []int
+		for i := 0; i < 100; i++ {
+			have = append(have, <-ch)
+		}
+		sort.Slice(have, func(i, j int) bool { return have[i] < have[j] })
+		require.Equal(t, want, have)
+		require.Len(t, ch, 0)
+
+		top, ok := s.CheckPop()
+		require.Zero(t, top)
+		require.False(t, ok)
 	})
 }
 
@@ -360,8 +443,10 @@ func Test_ConcurrentUse(t *testing.T) {
 				switch i % 16 {
 				case 0, 1, 2, 3:
 					s.Push(i)
-				case 4, 5, 6, 7:
+				case 4, 5:
 					s.Pop()
+				case 6, 7:
+					s.CheckPop()
 				case 8, 9, 10:
 					s.Peek()
 				case 11, 12:
@@ -382,6 +467,7 @@ func Test_ConcurrentUse(t *testing.T) {
 const (
 	benchOpPush benchOp = iota
 	benchOpPop
+	benchOpCheckPop
 	benchOpPeek
 	benchOpEmpty
 	benchOpCount
@@ -395,6 +481,9 @@ func Benchmark_Push(b *testing.B) {
 }
 func Benchmark_Pop(b *testing.B) {
 	benchmark_operation(b, benchOpPop, 1_000_000)
+}
+func Benchmark_CheckPop(b *testing.B) {
+	benchmark_operation(b, benchOpCheckPop, 1_000_000)
 }
 func Benchmark_Peek(b *testing.B) {
 	benchmark_operation(b, benchOpPeek, 1_000_000)
@@ -422,6 +511,8 @@ func benchmark_operation(b *testing.B, op benchOp, size int) {
 			s.Push(i)
 		case benchOpPop:
 			s.Pop()
+		case benchOpCheckPop:
+			s.CheckPop()
 		case benchOpPeek:
 			s.Peek()
 		case benchOpEmpty:
