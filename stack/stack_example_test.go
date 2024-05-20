@@ -4,7 +4,7 @@ import (
 	"fmt"
 	"math"
 
-	"github.com/green-aloe/enobox/stack"
+	"github.com/green-aloe/utility/stack"
 )
 
 func ExampleStack_Push() {
@@ -41,6 +41,29 @@ func ExampleStack_Pop() {
 	// world
 	// hello
 	//
+}
+
+func ExampleStack_CheckPop() {
+	var s stack.Stack[uint8]
+	top1, ok1 := s.CheckPop()
+
+	s.Push(3)
+	s.Push(5)
+
+	top2, ok2 := s.CheckPop()
+	top3, ok3 := s.CheckPop()
+	top4, ok4 := s.CheckPop()
+
+	fmt.Println(top1, ok1)
+	fmt.Println(top2, ok2)
+	fmt.Println(top3, ok3)
+	fmt.Println(top4, ok4)
+
+	// Output:
+	// 0 false
+	// 5 true
+	// 3 true
+	// 0 false
 }
 
 func ExampleStack_Peek() {
