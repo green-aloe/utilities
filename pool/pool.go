@@ -30,3 +30,16 @@ func (pool *Pool[T]) Get() (t T) {
 
 	return
 }
+
+// Store stores an object in the pool for later reuse. If ClearItem is non-nil, the pool clears the
+// item before storing it.
+func (pool *Pool[T]) Store(t T) {
+	if pool == nil {
+		return
+	}
+
+	if pool.ClearItem != nil {
+		t = pool.ClearItem(t)
+	}
+	pool.stack.Push(t)
+}
