@@ -4,6 +4,12 @@ import (
 	"github.com/green-aloe/utility/stack"
 )
 
+// A pool is a collection of items that can be reused. If a pool is empty when an item is requested,
+// it can generate a new item. The zero value of a pool is read to use and safe for concurrent
+// access by multiple goroutines.
+//
+// One of the key differences between this pool and a sync.Pool is that this pool does not
+// automatically remove any items stored in it.
 type Pool[T any] struct {
 	// NewItem generates a new item when the pool is empty.
 	NewItem func() T
