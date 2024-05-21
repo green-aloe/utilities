@@ -12,3 +12,21 @@ type Pool[T any] struct {
 
 	stack stack.Stack[T]
 }
+
+// Get returns a new or recycled object from the pool. If pool is nil or pool is empty and NewItem
+// is nil, this returns the zero value of T.
+func (pool *Pool[T]) Get() (t T) {
+	if pool == nil {
+		return
+	}
+
+	if t, ok := pool.stack.CheckPop(); ok {
+		return t
+	}
+
+	if pool.NewItem != nil {
+		return pool.NewItem()
+	}
+
+	return
+}
