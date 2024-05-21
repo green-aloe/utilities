@@ -43,3 +43,12 @@ func (pool *Pool[T]) Store(t T) {
 	}
 	pool.stack.Push(t)
 }
+
+// Count returns the number of items in the pool.
+func (pool *Pool[T]) Count() int {
+	if pool == nil {
+		return 0
+	}
+
+	return pool.stack.Count()
+}
