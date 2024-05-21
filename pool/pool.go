@@ -52,3 +52,12 @@ func (pool *Pool[T]) Count() int {
 
 	return pool.stack.Count()
 }
+
+// Clear removes all items from the pool.
+func (pool *Pool[T]) Clear() {
+	if pool == nil {
+		return
+	}
+
+	pool.stack.Clear()
+}

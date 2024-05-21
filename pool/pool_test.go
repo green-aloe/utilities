@@ -307,3 +307,70 @@ func Test_Pool_Count(t *testing.T) {
 		wg.Wait()
 	})
 }
+
+// Test_Pool_Clear tests that Pool's Clear method correctly empties the pool.
+func Test_Pool_Clear(t *testing.T) {
+	t.Run("nil pool", func(t *testing.T) {
+		var pool *Pool[string]
+		pool.Clear()
+
+		require.Equal(t, 0, pool.Count())
+	})
+
+	t.Run("zero pool", func(t *testing.T) {
+		var pool Pool[float64]
+		pool.Clear()
+
+		require.Equal(t, 0, pool.Count())
+	})
+
+	t.Run("empty pool", func(t *testing.T) {
+		pool := Pool[rune]{
+			NewItem:   func() rune { return '😲' },
+			ClearItem: func(rune) rune { return '👎' },
+		}
+		pool.Clear()
+
+		require.Equal(t, 0, pool.Count())
+	})
+
+	t.Run("non-empty pool", func(t *testing.T) {
+		pool := Pool[int]{
+			NewItem:   func() int { return 10 },
+			ClearItem: func(int) int { return 20 },
+		}
+		pool.Store(1)
+		pool.Store(2)
+		require.Equal(t, 2, pool.Count())
+
+		pool.Clear()
+
+		require.Equal(t, 0, pool.Count())
+	})
+
+	t.Run("concurrent use", func(t *testing.T) {
+		pool := Pool[int]{
+			NewItem:   func() int { return 1 },
+			ClearItem: func(int) int { return 2 },
+		}
+		for i := 0; i < 100; i++ {
+			pool.Store(i)
+		}
+
+		var wg sync.WaitGroup
+		for i := 0; i < 100; i++ {
+			wg.Add(1)
+			go func() {
+				defer wg.Done()
+
+				for j := 0; j < 100; j++ {
+					pool.Store(j)
+					pool.Clear()
+				}
+			}()
+		}
+		wg.Wait()
+
+		require.Equal(t, 0, pool.Count())
+	})
+}
