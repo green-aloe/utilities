@@ -5,7 +5,7 @@ import (
 )
 
 // A pool is a collection of items that can be reused. If a pool is empty when an item is requested,
-// it can generate a new item. The zero value of a pool is read to use and safe for concurrent
+// it can generate a new item. The zero value of a pool is ready to use and safe for concurrent
 // access by multiple goroutines.
 //
 // One of the key differences between this pool and a sync.Pool is that this pool does not
