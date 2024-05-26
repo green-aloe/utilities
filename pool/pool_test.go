@@ -36,9 +36,9 @@ func Test_Pool_Get(t *testing.T) {
 		require.Equal(t, float32(1.1), item)
 	})
 
-	t.Run("empty pool, ClearItem callback", func(t *testing.T) {
+	t.Run("empty pool, Prestore callback", func(t *testing.T) {
 		pool := Pool[float64]{
-			ClearItem: func(float64) float64 { return 2.2 },
+			Prestore: func(float64) float64 { return 2.2 },
 		}
 		item := pool.Get()
 		require.Zero(t, item)
@@ -46,8 +46,8 @@ func Test_Pool_Get(t *testing.T) {
 
 	t.Run("empty pool, both callbacks", func(t *testing.T) {
 		pool := Pool[int8]{
-			NewItem:   func() int8 { return 1 },
-			ClearItem: func(int8) int8 { return 5 },
+			NewItem:  func() int8 { return 1 },
+			Prestore: func(int8) int8 { return 5 },
 		}
 		item := pool.Get()
 		require.Equal(t, int8(1), item)
@@ -77,9 +77,9 @@ func Test_Pool_Get(t *testing.T) {
 		require.Equal(t, "test1", item)
 	})
 
-	t.Run("non-empty pool, ClearItem callback", func(t *testing.T) {
+	t.Run("non-empty pool, Prestore callback", func(t *testing.T) {
 		pool := Pool[bool]{
-			ClearItem: func(bool) bool { return true },
+			Prestore: func(bool) bool { return true },
 		}
 		pool.Store(true)
 
@@ -92,8 +92,8 @@ func Test_Pool_Get(t *testing.T) {
 
 	t.Run("non-empty pool, both callbacks", func(t *testing.T) {
 		pool := Pool[uint64]{
-			NewItem:   func() uint64 { return 1000 },
-			ClearItem: func(uint64) uint64 { return 256 },
+			NewItem:  func() uint64 { return 1000 },
+			Prestore: func(uint64) uint64 { return 256 },
 		}
 		pool.Store(123)
 
@@ -106,8 +106,8 @@ func Test_Pool_Get(t *testing.T) {
 
 	t.Run("concurrent use", func(t *testing.T) {
 		pool := Pool[int]{
-			NewItem:   func() int { return 1 },
-			ClearItem: func(int) int { return 2 },
+			NewItem:  func() int { return 1 },
+			Prestore: func(int) int { return 2 },
 		}
 
 		for i := 0; i < 100; i++ {
@@ -155,9 +155,9 @@ func Test_Pool_Store(t *testing.T) {
 		require.Equal(t, int32(4), pool.Get())
 	})
 
-	t.Run("empty pool, ClearItem callback", func(t *testing.T) {
+	t.Run("empty pool, Prestore callback", func(t *testing.T) {
 		pool := Pool[int]{
-			ClearItem: func(int) int { return 200 },
+			Prestore: func(int) int { return 200 },
 		}
 		pool.Store(5)
 
@@ -167,8 +167,8 @@ func Test_Pool_Store(t *testing.T) {
 
 	t.Run("empty pool, both callbacks", func(t *testing.T) {
 		pool := Pool[float32]{
-			NewItem:   func() float32 { return 1.1 },
-			ClearItem: func(float32) float32 { return 5.5 },
+			NewItem:  func() float32 { return 1.1 },
+			Prestore: func(float32) float32 { return 5.5 },
 		}
 		pool.Store(400)
 
@@ -198,9 +198,9 @@ func Test_Pool_Store(t *testing.T) {
 		require.Equal(t, []rune{'d', 'e', 'f'}, pool.Get())
 	})
 
-	t.Run("non-empty pool, ClearItem callback", func(t *testing.T) {
+	t.Run("non-empty pool, Prestore callback", func(t *testing.T) {
 		pool := Pool[[]rune]{
-			ClearItem: func([]rune) []rune { return nil },
+			Prestore: func([]rune) []rune { return nil },
 		}
 		pool.Store([]rune{'d', 'e', 'f'})
 		pool.Store([]rune{'g', 'h', 'i'})
@@ -212,8 +212,8 @@ func Test_Pool_Store(t *testing.T) {
 
 	t.Run("non-empty pool, both callbacks", func(t *testing.T) {
 		pool := Pool[int]{
-			NewItem:   func() int { return 23 },
-			ClearItem: func(int) int { return 24 },
+			NewItem:  func() int { return 23 },
+			Prestore: func(int) int { return 24 },
 		}
 		pool.Store(123)
 		pool.Store(321)
@@ -225,8 +225,8 @@ func Test_Pool_Store(t *testing.T) {
 
 	t.Run("concurrent use", func(t *testing.T) {
 		pool := Pool[int]{
-			NewItem:   func() int { return 1 },
-			ClearItem: func(int) int { return 2 },
+			NewItem:  func() int { return 1 },
+			Prestore: func(int) int { return 2 },
 		}
 
 		var wg sync.WaitGroup
@@ -263,16 +263,16 @@ func Test_Pool_Count(t *testing.T) {
 
 	t.Run("empty pool", func(t *testing.T) {
 		pool := Pool[int]{
-			NewItem:   func() int { return 10 },
-			ClearItem: func(int) int { return 20 },
+			NewItem:  func() int { return 10 },
+			Prestore: func(int) int { return 20 },
 		}
 		require.Equal(t, 0, pool.Count())
 	})
 
 	t.Run("non-empty pool", func(t *testing.T) {
 		pool := Pool[int]{
-			NewItem:   func() int { return 10 },
-			ClearItem: func(int) int { return 20 },
+			NewItem:  func() int { return 10 },
+			Prestore: func(int) int { return 20 },
 		}
 		pool.Store(1)
 		pool.Store(2)
@@ -289,8 +289,8 @@ func Test_Pool_Count(t *testing.T) {
 
 	t.Run("concurrent use", func(t *testing.T) {
 		pool := Pool[int]{
-			NewItem:   func() int { return 1 },
-			ClearItem: func(int) int { return 2 },
+			NewItem:  func() int { return 1 },
+			Prestore: func(int) int { return 2 },
 		}
 		for i := 0; i < 100; i++ {
 			pool.Store(i)
@@ -326,8 +326,8 @@ func Test_Pool_Clear(t *testing.T) {
 
 	t.Run("empty pool", func(t *testing.T) {
 		pool := Pool[rune]{
-			NewItem:   func() rune { return '😲' },
-			ClearItem: func(rune) rune { return '👎' },
+			NewItem:  func() rune { return '😲' },
+			Prestore: func(rune) rune { return '👎' },
 		}
 		pool.Clear()
 
@@ -336,8 +336,8 @@ func Test_Pool_Clear(t *testing.T) {
 
 	t.Run("non-empty pool", func(t *testing.T) {
 		pool := Pool[int]{
-			NewItem:   func() int { return 10 },
-			ClearItem: func(int) int { return 20 },
+			NewItem:  func() int { return 10 },
+			Prestore: func(int) int { return 20 },
 		}
 		pool.Store(1)
 		pool.Store(2)
@@ -350,8 +350,8 @@ func Test_Pool_Clear(t *testing.T) {
 
 	t.Run("concurrent use", func(t *testing.T) {
 		pool := Pool[int]{
-			NewItem:   func() int { return 1 },
-			ClearItem: func(int) int { return 2 },
+			NewItem:  func() int { return 1 },
+			Prestore: func(int) int { return 2 },
 		}
 		for i := 0; i < 100; i++ {
 			pool.Store(i)

@@ -2,6 +2,7 @@ package pool_test
 
 import (
 	"fmt"
+	"log"
 
 	"github.com/green-aloe/utility/pool"
 )
@@ -45,7 +46,9 @@ func ExamplePool_Store() {
 				Age:  74,
 			}
 		},
-		ClearItem: func(person Person) Person {
+		Prestore: func(person Person) Person {
+			log.Println("Storing", person.Name, "in pool")
+
 			person.Name = ""
 			person.Age = 0
 

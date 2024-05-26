@@ -9,12 +9,13 @@ import (
 // access by multiple goroutines.
 //
 // One of the key differences between this pool and a sync.Pool is that this pool does not
-// automatically remove any items stored in it.
+// automatically remove any items stored in it. XXX
 type Pool[T any] struct {
 	// NewItem generates a new item when the pool is empty.
 	NewItem func() T
-	// ClearItem clears an item before storing it in the pool.
-	ClearItem func(T) T
+	// Prestore is called before storing an item in the pool and allows for monitoring or
+	// transforming items as they are stored.
+	Prestore func(T) T
 
 	stack stack.Stack[T]
 }
@@ -37,15 +38,15 @@ func (pool *Pool[T]) Get() (t T) {
 	return
 }
 
-// Store stores an object in the pool for later reuse. If ClearItem is non-nil, the pool clears the
+// Store stores an object in the pool for later reuse. If Prestore is non-nil, the pool clears the
 // item before storing it.
 func (pool *Pool[T]) Store(t T) {
 	if pool == nil {
 		return
 	}
 
-	if pool.ClearItem != nil {
-		t = pool.ClearItem(t)
+	if pool.Prestore != nil {
+		t = pool.Prestore(t)
 	}
 	pool.stack.Push(t)
 }
