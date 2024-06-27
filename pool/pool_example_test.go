@@ -46,7 +46,7 @@ func ExamplePool_Store() {
 				Age:  74,
 			}
 		},
-		Prestore: func(person Person) Person {
+		PreStore: func(person Person) Person {
 			log.Println("Storing", person.Name, "in pool")
 
 			person.Name = ""

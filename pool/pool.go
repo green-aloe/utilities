@@ -13,9 +13,9 @@ import (
 type Pool[T any] struct {
 	// NewItem generates a new item when the pool is empty.
 	NewItem func() T
-	// Prestore is called before storing an item in the pool and allows for monitoring or
+	// PreStore is called before storing an item in the pool and allows for monitoring or
 	// transforming items as they are stored.
-	Prestore func(T) T
+	PreStore func(T) T
 
 	stack stack.Stack[T]
 }
@@ -38,15 +38,15 @@ func (pool *Pool[T]) Get() (t T) {
 	return
 }
 
-// Store stores an object in the pool for later reuse. If Prestore is non-nil, the pool clears the
+// Store stores an object in the pool for later reuse. If PreStore is non-nil, the pool clears the
 // item before storing it.
 func (pool *Pool[T]) Store(t T) {
 	if pool == nil {
 		return
 	}
 
-	if pool.Prestore != nil {
-		t = pool.Prestore(t)
+	if pool.PreStore != nil {
+		t = pool.PreStore(t)
 	}
 	pool.stack.Push(t)
 }
