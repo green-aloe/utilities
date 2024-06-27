@@ -71,12 +71,22 @@ func Test_Stack_Pop(t *testing.T) {
 	})
 
 	t.Run("non-empty stack", func(t *testing.T) {
-		var s Stack[int]
+		var s Stack[*int]
 		for i := 1; i <= 10; i++ {
-			s.Push(i)
+			if i == 5 {
+				s.Push(nil)
+			} else {
+				s.Push(&i)
+			}
 		}
 		for i := 10; i >= 1; i-- {
-			require.Equal(t, i, s.Pop())
+			if i == 5 {
+				require.Nil(t, s.Pop())
+			} else {
+				v := s.Pop()
+				require.NotNil(t, v)
+				require.Equal(t, i, *v)
+			}
 		}
 
 		require.Zero(t, s.Pop())
