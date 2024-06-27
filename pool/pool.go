@@ -13,8 +13,8 @@ import (
 type Pool[T any] struct {
 	// NewItem generates a new item when the pool is empty.
 	NewItem func() T
-	// PreStore is called before storing an item in the pool and allows for monitoring or
-	// transforming items as they are stored.
+	// PreStore is called before storing an item in the pool. It enables additional functionality
+	// like monitoring or transforming items as they are stored.
 	PreStore func(T) T
 
 	stack stack.Stack[T]
