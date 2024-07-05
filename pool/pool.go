@@ -9,7 +9,7 @@ import (
 // access by multiple goroutines.
 //
 // One of the key differences between this pool and a sync.Pool is that this pool does not
-// automatically remove any items stored in it. XXX
+// automatically remove any items stored in it and has no automatic cleanup mechanism.
 type Pool[T any] struct {
 	// NewItem generates a new item when the pool is empty.
 	NewItem func() T
