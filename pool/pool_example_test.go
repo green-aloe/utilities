@@ -18,8 +18,9 @@ func ExamplePool_Get() {
 	pool := pool.Pool[Person]{
 		NewItem: func() Person {
 			return Person{
-				Name: "Alice",
-				Age:  74,
+				Name:     "Alice",
+				Age:      74,
+				internal: 1,
 			}
 		},
 	}
@@ -28,7 +29,7 @@ func ExamplePool_Get() {
 	fmt.Println(person)
 
 	// Output:
-	// {Alice 74 0}
+	// {Alice 74 1}
 }
 
 func ExamplePool_Store() {
@@ -42,8 +43,9 @@ func ExamplePool_Store() {
 	pool := pool.Pool[Person]{
 		NewItem: func() Person {
 			return Person{
-				Name: "Alice",
-				Age:  74,
+				Name:     "Alice",
+				Age:      75,
+				internal: 2,
 			}
 		},
 		PreStore: func(person Person) Person {
