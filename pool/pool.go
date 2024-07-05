@@ -1,7 +1,7 @@
 package pool
 
 import (
-	"github.com/green-aloe/utility/stack"
+	"github.com/green-aloe/utilities/stack"
 )
 
 // A pool is a collection of items that can be reused. If a pool is empty when an item is requested,

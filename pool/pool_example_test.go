@@ -4,7 +4,7 @@ import (
 	"fmt"
 	"log"
 
-	"github.com/green-aloe/utility/pool"
+	"github.com/green-aloe/utilities/pool"
 )
 
 func ExamplePool_Get() {
