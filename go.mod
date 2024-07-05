@@ -1,4 +1,4 @@
-module github.com/green-aloe/utility
+module github.com/green-aloe/utilities
 
 go 1.22.2
 
