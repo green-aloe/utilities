@@ -4,7 +4,7 @@ import (
 	"fmt"
 	"math"
 
-	"github.com/green-aloe/utility/stack"
+	"github.com/green-aloe/utilities/stack"
 )
 
 func ExampleStack_Push() {
