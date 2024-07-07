@@ -104,6 +104,19 @@ func Test_Pool_Get(t *testing.T) {
 		require.Equal(t, uint64(1000), item)
 	})
 
+	t.Run("non-empty pool, zero value", func(t *testing.T) {
+		pool := Pool[string]{
+			NewItem: func() string { return "new string" },
+		}
+		pool.Store("")
+
+		item := pool.Get()
+		require.Zero(t, item)
+
+		item = pool.Get()
+		require.Equal(t, "new string", item)
+	})
+
 	t.Run("concurrent use", func(t *testing.T) {
 		pool := Pool[int]{
 			NewItem:  func() int { return 1 },
