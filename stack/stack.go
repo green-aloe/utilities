@@ -6,14 +6,8 @@ import "sync"
 // the first one popped from it. The zero value is an empty stack and ready to use. A stack is safe
 // for concurrent use.
 type Stack[T any] struct {
-	top   *node[T]
+	items []T
 	mutex sync.Mutex
-}
-
-// A node is a single element in a stack.
-type node[T any] struct {
-	v    T
-	next *node[T]
 }
 
 // Push adds a value to the top of the stack.
@@ -25,10 +19,7 @@ func (s *Stack[T]) Push(v T) {
 	s.mutex.Lock()
 	defer s.mutex.Unlock()
 
-	s.top = &node[T]{
-		v:    v,
-		next: s.top,
-	}
+	s.items = append(s.items, v)
 }
 
 // Pop removes and returns the value at the top of the stack. If the stack is empty, this returns
@@ -41,14 +32,14 @@ func (s *Stack[T]) Pop() (t T) {
 	s.mutex.Lock()
 	defer s.mutex.Unlock()
 
-	if s.top == nil {
+	if len(s.items) == 0 {
 		return
 	}
 
-	v := s.top.v
-	s.top = s.top.next
+	t, s.items[len(s.items)-1] = s.items[len(s.items)-1], t
+	s.items = s.items[:len(s.items)-1]
 
-	return v
+	return t
 }
 
 // CheckPop returns the value at the top of the stack and a boolean indicating whether the stack is
@@ -61,14 +52,14 @@ func (s *Stack[T]) CheckPop() (t T, ok bool) {
 	s.mutex.Lock()
 	defer s.mutex.Unlock()
 
-	if s.top == nil {
+	if len(s.items) == 0 {
 		return
 	}
 
-	v := s.top.v
-	s.top = s.top.next
+	t, s.items[len(s.items)-1] = s.items[len(s.items)-1], t
+	s.items = s.items[:len(s.items)-1]
 
-	return v, true
+	return t, true
 }
 
 // Peek returns the value at the top of the stack without removing it. If the stack is empty, this
@@ -81,11 +72,11 @@ func (s *Stack[T]) Peek() (t T) {
 	s.mutex.Lock()
 	defer s.mutex.Unlock()
 
-	if s.top == nil {
+	if len(s.items) == 0 {
 		return
 	}
 
-	return s.top.v
+	return s.items[len(s.items)-1]
 }
 
 // Empty returns true if the stack is empty.
@@ -97,7 +88,7 @@ func (s *Stack[T]) Empty() bool {
 	s.mutex.Lock()
 	defer s.mutex.Unlock()
 
-	return s.top == nil
+	return len(s.items) == 0
 }
 
 // Count returns the number of elements in the stack.
@@ -109,12 +100,7 @@ func (s *Stack[T]) Count() int {
 	s.mutex.Lock()
 	defer s.mutex.Unlock()
 
-	count := 0
-	for n := s.top; n != nil; n = n.next {
-		count++
-	}
-
-	return count
+	return len(s.items)
 }
 
 // Clear removes all elements from the stack.
@@ -126,5 +112,5 @@ func (s *Stack[T]) Clear() {
 	s.mutex.Lock()
 	defer s.mutex.Unlock()
 
-	s.top = nil
+	s.items = nil
 }
